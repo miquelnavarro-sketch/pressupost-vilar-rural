@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pressupost - Vilar Rural Sant Hilari Sacalm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e5631;
+      --primary-light: #4a7c59;
+      --accent: #b5c934;
+      --accent-hover: #9eaf27;
+      --orange: #e67e22;
+      --dark: #1f2937;
+      --light: #f4f6f0;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-700: #374151;
+      --danger: #ef4444;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--light); color: var(--dark); line-height: 1.45; padding: 20px; }
+    
+    /* PANTALLA DE LOGIN / SEGURETAT */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background: white;
+      padding: 32px;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-top: 5px solid var(--accent);
+    }
+    .login-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+    .login-subtitle { font-size: 12px; color: var(--gray-700); margin-bottom: 20px; }
+    .login-error { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: 10px; display: none; }
+
+    .app-container { max-width: 980px; margin: 0 auto; background: var(--white); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(30,86,49,0.15); overflow: hidden; display: none; }
+    
+    .toolbar { background: var(--dark); color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .toolbar-title { font-size: 14px; font-weight: 600; color: var(--accent); }
+    .btn-tb { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; margin-left: 5px; }
+    .btn-tb:hover { background: rgba(255,255,255,0.2); border-color: var(--accent); color: var(--accent); }
+    .select-lang { background: var(--primary); color: white; border: 1px solid var(--accent); padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-right: 10px; }
+
+    .header { 
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); 
+      color: white; 
+      padding: 28px 40px 20px 40px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      position: relative; 
+      border-bottom: 5px solid var(--accent); 
+    }
+    
+    .brand-logo-container { 
+      position: relative; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      margin-bottom: 10px; 
+      background: white; 
+      padding: 8px 16px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .brand-logo-img { height: 90px; width: auto; max-width: 100%; object-fit: contain; }
+    .brand-logo-fallback { width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; color: var(--primary); border: 3px solid var(--accent); }
+    .logo-upload-btn { position: absolute; bottom: -6px; right: -6px; background: var(--accent); color: var(--primary); border-radius: 50%; width: 26px; height: 26px; font-size: 13px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.25); }
+
+    .doc-meta-header { text-align: center; margin-top: 4px; }
+    .doc-type { font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: 0.5px; text-transform: uppercase; }
+
+    .content { padding: 30px 40px; }
+    .page-break { page-break-before: always; page-break-inside: avoid; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 18px; }
+    .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 10px; }
+    .card-client .card-title { color: var(--orange); }
+
+    .form-group { margin-bottom: 8px; }
+    label { display: block; font-size: 11px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; text-transform: uppercase; }
+    input, textarea, select { width: 100%; padding: 8px 12px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--dark); background: white; }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .input-with-btn { display: flex; gap: 6px; }
+    .btn-refresh-num { background: var(--gray-200); border: 1px solid var(--gray-300); border-radius: 6px; padding: 0 10px; cursor: pointer; font-size: 14px; }
+    .btn-refresh-num:hover { background: var(--gray-300); }
+
+    .gestor-info-box { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--gray-300); }
+    .gestor-avatar-container { position: relative; width: 48px; height: 48px; cursor: pointer; flex-shrink: 0; }
+    .gestor-avatar-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); background: white; }
+    .gestor-avatar-fallback { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent); background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; }
+    .gestor-upload-badge { position: absolute; bottom: -2px; right: -2px; background: var(--accent); color: var(--primary); border-radius: 50%; width: 16px; height: 16px; font-size: 9px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid white; }
+    .gestor-details { font-size: 12px; line-height: 1.3; }
+    .gestor-name { font-weight: 700; color: var(--primary); }
+    .gestor-contact { color: var(--gray-700); font-size: 11px; }
+
+    .stay-builder { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 18px; margin-bottom: 24px; }
+    .stay-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+
+    .validation-alert { font-size: 11px; font-weight: 700; color: var(--danger); margin-top: 4px; display: none; }
+
+    .section-category { margin-top: 25px; margin-bottom: 15px; }
+    .section-category h3 { font-size: 13px; font-weight: 700; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 4px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+    .badge-iva { font-size: 10px; background: var(--primary-light); color: white; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+
+    .table-container { margin-bottom: 10px; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    thead { display: table-header-group; }
+    tfoot { display: table-row-group; }
+    tr { page-break-inside: avoid; break-inside: avoid; }
+    
+    th { background: var(--primary); color: white; font-size: 11px; font-weight: 600; text-transform: uppercase; padding: 10px 12px; }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--gray-200); background: white; font-size: 13px; }
+    td input { border: 1px solid transparent; background: transparent; padding: 4px; }
+    td input:hover, td input:focus { border-color: var(--gray-300); background: white; }
+    .text-right { text-align: right; }
+
+    .subtotal-row td { background: #f4f8f5 !important; border-top: 2px solid #c8e6c9 !important; font-size: 12px; color: var(--primary); padding: 8px 12px; }
+    .subtotal-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .subtotal-val { font-weight: 800; font-size: 13px; }
+
+    .btn { padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-accent { background: var(--accent); color: var(--primary); font-weight: 700; }
+    .btn-accent:disabled { background: var(--gray-300); color: var(--gray-500); cursor: not-allowed; }
+    .btn-icon { background: transparent; border: none; color: var(--gray-500); cursor: pointer; }
+    .btn-icon:hover { color: var(--danger); }
+
+    .summary-container { display: flex; justify-content: flex-end; margin-top: 20px; page-break-inside: avoid; }
+    .summary-card { width: 340px; background: var(--gray-50); border: 2px solid var(--accent); border-radius: var(--radius); padding: 16px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; color: var(--gray-700); }
+    .summary-row.total { border-top: 2px solid var(--primary); margin-top: 8px; padding-top: 8px; font-size: 16px; font-weight: 700; color: var(--primary); }
+
+    .conditions-page { page-break-inside: avoid; }
+    .conditions-wrapper { font-size: 11px; color: var(--dark); line-height: 1.45; }
+    .conditions-wrapper h2 { font-size: 16px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 4px; margin-bottom: 14px; text-transform: uppercase; }
+    .condition-block { margin-bottom: 10px; background: var(--gray-50); border-left: 3px solid var(--primary); padding: 9px 14px; border-radius: 0 var(--radius) var(--radius) 0; }
+    .condition-block h4 { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; }
+    .condition-block p, .condition-block ul { font-size: 11px; color: var(--gray-700); }
+    .condition-block ul { padding-left: 16px; margin-top: 3px; }
+    .conditions-note { font-style: italic; color: var(--gray-700); font-size: 10px; margin-top: 12px; border-top: 1px solid var(--gray-200); padding-top: 6px; }
+
+    .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 25px; page-break-inside: avoid; }
+    .signature-box { 
+      border-top: 2px dashed var(--gray-300); 
+      text-align: center; 
+      padding-top: 10px; 
+      font-size: 12px; 
+      color: var(--gray-700); 
+      font-weight: 600;
+      min-height: 130px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: space-between; 
+    }
+    .signature-img-preview { max-height: 100px; max-width: 200px; object-fit: contain; margin-bottom: 6px; border-radius: 6px; }
+    .footer { text-align: center; padding: 12px; background: var(--dark); color: white; font-size: 10px; margin-top: 25px; }
+
+    @media print {
+      body { padding: 0; background: white; }
+      .toolbar, .stay-builder, .no-print, .btn-icon, .logo-upload-btn, .btn-upload-sig, .btn-add-concept, .gestor-upload-badge, .btn-refresh-num { display: none !important; }
+      .app-container { box-shadow: none; border-radius: 0; }
+      input, textarea, select { border: none !important; background: transparent !important; padding: 0 !important; appearance: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PANTALLA D'ACCÉS / SEGURETAT -->
+<div id="login-overlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-title">Vilar Rural Sant Hilari</div>
+    <div class="login-subtitle">Gestor de Pressupostos de Grups</div>
+    <div class="form-group">
+      <input type="password" id="input-pass" placeholder="Introdueix el PIN o contrasenya" style="text-align: center; font-size: 16px;">
+    </div>
+    <button class="btn btn-accent" id="btn-login" style="width: 100%; padding: 10px; margin-top: 8px;">Entrar a l'aplicació</button>
+    <div id="login-error" class="login-error">⚠️ Contrasenya incorrecta</div>
+  </div>
+</div>
+
+<div class="app-container" id="app-main">
+  <div class="toolbar no-print">
+    <div class="toolbar-title">Vilar Rural — Gestor de Pressupostos</div>
+    <div>
+      <select id="sel-lang" class="select-lang">
+        <option value="ca">🌐 Català</option>
+        <option value="es">🌐 Español</option>
+        <option value="en">🌐 English</option>
+        <option value="fr">🌐 Français</option>
+      </select>
+      <button class="btn-tb" id="btn-excel" style="color: var(--accent);" data-i18n="btn_excel">📊 Exportar línia a Excel</button>
+      <button class="btn-tb" id="btn-pdf" data-i18n="btn_pdf">📄 Descarregar PDF</button>
+      <button class="btn-tb" onclick="window.print()" data-i18n="btn_print">🖨️ Imprimir</button>
+    </div>
+  </div>
+
+  <div id="quotation-doc">
+    <!-- PÀGINA 1: CARÀTULA -->
+    <div class="header">
+      <div class="brand-logo-container" onclick="document.getElementById('file-logo').click()">
+        <img id="img-logo" class="brand-logo-img" style="display:none;" alt="Logo Hotel">
+        <div id="fallback-logo" class="brand-logo-fallback">VR</div>
+        <div class="logo-upload-btn no-print" title="Carregar o canviar logo">📷</div>
+        <input type="file" id="file-logo" accept="image/*" style="display:none;" class="no-print">
+      </div>
+      
+      <div class="doc-meta-header">
+        <div class="doc-type" data-i18n="doc_type">Pressupost – Grups i Esdeveniments</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" data-i18n="establishment_title">🏢 DADES DE L'ESTABLIMENT</div>
+          <div class="form-group"><input type="text" value="Montsenyser S.L. - NIF B-61998365" readonly></div>
+          <div class="form-group"><input type="text" value="Carrer Garbí, 88-90 - 08397 Pineda de Mar (Barcelona)" readonly></div>
+          
+          <div class="form-group no-print" style="margin-top: 10px;">
+            <label data-i18n="select_gestor">Seleccionar Gestor/a de Grups:</label>
+            <select id="sel-gestor">
+              <option value="1">1. Joan Munné - Groups Controller</option>
+              <option value="2">2. Miquel Navarro - Gestor de grups</option>
+              <option value="3">3. Equip de Grups</option>
+            </select>
+          </div>
+
+          <div class="gestor-info-box">
+            <div class="gestor-avatar-container" onclick="document.getElementById('file-gestor').click()">
+              <img id="gestor-foto" class="gestor-avatar-img" style="display:none;" alt="Foto Gestor">
+              <div id="gestor-fallback" class="gestor-avatar-fallback">JM</div>
+              <div class="gestor-upload-badge no-print" title="Canviar foto">📷</div>
+              <input type="file" id="file-gestor" accept="image/*" style="display:none;" class="no-print">
+            </div>
+            <div class="gestor-details">
+              <div class="gestor-name" id="gestor-nom">Joan Munné</div>
+              <div class="gestor-contact" id="gestor-carrec">Groups Controller</div>
+              <div class="gestor-contact" id="gestor-tel-email">Tel. (+34) 93 419 36 77 (opció 2) | comercial.hotels@grupserhs.com</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-client">
+          <div class="card-title" data-i18n="client_title">👤 CLIENT</div>
+          <div class="form-group">
+            <input type="text" id="client-nom" required placeholder="Nom del client o empresa *" data-i18n-ph="ph_client_nom">
+          </div>
+          <div class="form-group">
+            <input type="text" id="client-contacte-person" required placeholder="Persona de contacte *" data-i18n-ph="ph_client_contacte_person">
+          </div>
+          <div class="form-group">
+            <input type="email" id="client-email" required placeholder="Email de contacte *" data-i18n-ph="ph_client_email">
+          </div>
+          <div class="form-group">
+            <input type="tel" id="client-telefon" required placeholder="Telèfon de contacte *" data-i18n-ph="ph_client_telefon">
+          </div>
+          <div class="form-group">
+            <input type="text" id="client-adreca" placeholder="Adreça de facturació (Opcional)" data-i18n-ph="ph_client_adreca">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <label data-i18n="lbl_num_pressupost">Nº Pressupost</label>
+          <div class="input-with-btn">
+            <input type="text" id="num-pressupost" value="1-PRES-2026-001">
+            <button class="btn-refresh-num no-print" id="btn-next-num" title="Incrementar número">🔄</button>
+          </div>
+        </div>
+        <div class="card">
+          <label data-i18n="lbl_fecha">Data</label>
+          <input type="date" id="fecha">
+        </div>
+        <div class="card">
+          <label data-i18n="lbl_validez">Vàlid fins</label>
+          <input type="date" id="validez">
+        </div>
+      </div>
+
+      <div class="stay-builder no-print">
+        <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+          <span data-i18n="stay_builder_title">⚙️ Generador Dinàmic de Servei (Eina Interna)</span>
+        </div>
+        
+        <div style="margin-bottom: 12px;">
+          <label data-i18n="lbl_target_cat">Apartat on afegir el servei</label>
+          <select id="sel-target-cat" style="font-weight: 600; color: var(--primary);">
+            <option value="cat-1" data-i18n="opt_cat1">1. Allotjament i Règim (10% IVA)</option>
+            <option value="cat-2" data-i18n="opt_cat2">2. Gastronomia i Restauració (10% IVA)</option>
+            <option value="cat-3" data-i18n="opt_cat3">3. Activitats, Espais i Equipament (21% IVA)</option>
+          </select>
+        </div>
+
+        <!-- BLOC 1: ALLOTJAMENT I RÈGIM -->
+        <div id="fields-cat-1" class="stay-grid">
+          <div><label>Preu Base Adult (€)</label><input type="number" id="base-price-adult" value="100.00" step="0.01"></div>
+          <div><label data-i18n="lbl_room_type">Tipus Habitació</label>
+            <select id="sel-tipo">
+              <option value="confort">Confort</option>
+              <option value="confort_quad">Confort Quàdruple</option>
+              <option value="jardi" data-i18n-opt="opt_jardi">Jardí (+10%)</option>
+              <option value="baby_room">Baby Room (+15%)</option>
+              <option value="baby_quad">Baby Quad (+20%)</option>
+              <option value="suite">Suite (+30%)</option>
+            </select>
+          </div>
+          <div><label data-i18n="lbl_adults">Adults</label><input type="number" id="num-adultos" value="2" min="1" max="4"></div>
+          <div><label data-i18n="lbl_children">Nens (2-12a)</label><input type="number" id="num-ninos" value="0" min="0" max="3"></div>
+          <div><label data-i18n="lbl_babies">Nadons (0-2a)</label><input type="number" id="num-bebes" value="0" min="0" max="2"></div>
+          <div><label data-i18n="lbl_regimen">Règim</label>
+            <select id="sel-regimen">
+              <option value="SA">SA (-5€ / -2.5€)</option>
+              <option value="AD" selected>AD (Esmorzar inclòs)</option>
+              <option value="MP">MP (+20€ / +14€)</option>
+              <option value="PC">PC (+40€ / +28€)</option>
+            </select>
+          </div>
+          <div><label>Begudes Principals</label>
+            <select id="sel-begudes" disabled>
+              <option value="none" selected>Sense begudes</option>
+              <option value="aigua_vi">Aigua i/o Vi (+3€ / +2€)</option>
+              <option value="refrescos">Refrescos / Cerveses (+6€ / +5€)</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 18px;">
+            <input type="checkbox" id="chk-cafe" disabled style="width: auto; cursor: pointer;">
+            <label for="chk-cafe" style="margin:0; cursor: pointer; font-size:11px;">☕ Cafè (+3€/adult)</label>
+          </div>
+          <div><label style="color:var(--orange);">Descompte (%)</label><input type="number" id="disc-cat-1" value="0" min="0" max="100" step="1" placeholder="0%"></div>
+          <div><label data-i18n="lbl_nights">Nits</label><input type="number" id="stay-nights" value="1" min="1"></div>
+          <div style="grid-column: span 2;">
+            <label data-i18n="lbl_night_price">Preu Nit Calculat (€)</label>
+            <input type="number" id="stay-price" value="0.00" step="0.01" style="font-weight:700; color:var(--primary); background:#e8f5e9;">
+            <div id="validation-msg" class="validation-alert">⚠️ Ocupació no permesa per a aquesta habitació</div>
+          </div>
+        </div>
+
+        <!-- BLOC 2: GASTRONOMIA I RESTAURACIÓ -->
+        <div id="fields-cat-2" class="stay-grid" style="display: none;">
+          <div style="grid-column: span 2;"><label data-i18n="lbl_gastro_type">Tipus de Servei / Menú</label>
+            <select id="gastro-tipo">
+              <option value="Coffee Break Standard">Coffee Break Standard</option>
+              <option value="Coffee Break Premium">Coffee Break Premium</option>
+              <option value="Menú Executiu / Treball" data-i18n-opt="opt_menu_exec">Menú Executiu / Treball</option>
+              <option value="Menú Degustació Cuina de la Selva" data-i18n-opt="opt_menu_deg">Menú Degustació Cuina de la Selva</option>
+              <option value="Pica-pica d'Acollida" data-i18n-opt="opt_pica_pica">Pica-pica d'Acollida</option>
+              <option value="Sopar de Gala" data-i18n-opt="opt_sopar_gala">Sopar de Gala</option>
+            </select>
+          </div>
+          <div><label data-i18n="lbl_pax">Nº Comensals</label><input type="number" id="gastro-pax" value="20" min="1"></div>
+          <div><label data-i18n="lbl_pax_price">Preu / PAX (€ IVA inc.)</label><input type="number" id="gastro-price" value="35.00" step="0.01"></div>
+          <div><label style="color:var(--orange);">Descompte (%)</label><input type="number" id="disc-cat-2" value="0" min="0" max="100" step="1" placeholder="0%"></div>
+        </div>
+
+        <!-- BLOC 3: ACTIVITATS I ESPAIS -->
+        <div id="fields-cat-3" class="stay-grid" style="display: none;">
+          <div style="grid-column: span 2;"><label data-i18n="lbl_space_type">Espai / Activitat / Equipament</label>
+            <select id="space-tipo">
+              <option value="Sala de Reunions Gran" data-i18n-opt="opt_sala_gran">Sala de Reunions Gran</option>
+              <option value="Sala de Reunions Mitjana" data-i18n-opt="opt_sala_mitjana">Sala de Reunions Mitjana</option>
+              <option value="Lloguer de Gran Jardí Exterior" data-i18n-opt="opt_lloguer_jardi">Lloguer de Gran Jardí Exterior</option>
+              <option value="Equip de So i Microfonia" data-i18n-opt="opt_equip_so">Equip de So i Microfonia</option>
+              <option value="Projector i Pantalla HD" data-i18n-opt="opt_projector">Projector i Pantalla HD</option>
+              <option value="Activitat Team Building Guia local" data-i18n-opt="opt_team_building">Activitat Team Building Guia local</option>
+            </select>
+          </div>
+          <div><label data-i18n="lbl_space_duration">Durada / Concepte</label>
+            <select id="space-dur">
+              <option value="Jornada Sencera" data-i18n-opt="opt_jornada_sencera">Jornada Sencera</option>
+              <option value="Mitja Jornada" data-i18n-opt="opt_mitja_jornada">Mitja Jornada</option>
+              <option value="Servei x Hores" data-i18n-opt="opt_servei_hores">Servei x Hores</option>
+              <option value="Lloguer per Esdeveniment" data-i18n-opt="opt_lloguer_esdeveniment">Lloguer per Esdeveniment</option>
+            </select>
+          </div>
+          <div><label data-i18n="lbl_units">Unitats / Dies</label><input type="number" id="space-units" value="1" min="1"></div>
+          <div><label data-i18n="lbl_unit_price">Preu Un. (€ IVA inc.)</label><input type="number" id="space-price" value="250.00" step="0.01"></div>
+          <div><label style="color:var(--orange);">Descompte (%)</label><input type="number" id="disc-cat-3" value="0" min="0" max="100" step="1" placeholder="0%"></div>
+        </div>
+
+        <button class="btn btn-accent" id="btn-add-stay" style="margin-top: 5px;" data-i18n="btn_add_stay">┼ Afegir Línia Generada</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" data-i18n="details_title">📝 Detalls de l'Esdeveniment / Estada</div>
+        <textarea style="min-height: 100px;" placeholder="Observacions addicionals, dates de l'estada, horaris, nombre de comensals..." data-i18n-ph="ph_details"></textarea>
+      </div>
+    </div>
+
+    <!-- PÀGINA 2: RELACIÓ DE SERVEIS -->
+    <div class="page-break"></div>
+    <div class="content">
+
+      <h2 style="font-size: 18px; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;" data-i18n="services_header">RELACIÓ DE SERVEIS I PRESSUPOST DETALLAT</h2>
+
+      <div class="section-category" id="sec-cat-1">
+        <h3><span data-i18n="sec_cat1_title">1. Allotjament i Règim</span> <span class="badge-iva" data-i18n="badge_iva_10">IVA 10% INCLÒS</span></h3>
+        <div class="table-container">
+          <table>
+            <thead><tr><th style="width: 50%;" data-i18n="th_concept">Concepte</th><th style="width: 10%;" class="text-right" data-i18n="th_units">Unitats</th><th style="width: 18%;" class="text-right" data-i18n="th_price">Preu Un. (€)</th><th style="width: 16%;" class="text-right" data-i18n="th_total">Total (€)</th><th style="width: 6%;" class="no-print"></th></tr></thead>
+            <tbody id="tbody-cat-1"></tbody>
+            <tfoot>
+              <tr class="subtotal-row">
+                <td colspan="3" class="text-right subtotal-label" data-i18n="subtotal_cat1">Subtotal Allotjament (IVA inc.):</td>
+                <td class="text-right subtotal-val" id="subtotal-cat-1">0,00 €</td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button class="btn btn-primary no-print btn-add-concept" onclick="addRow('tbody-cat-1')" data-i18n="btn_add_manual">┼ Afegir línia manual</button>
+      </div>
+
+      <div class="section-category" id="sec-cat-2">
+        <h3><span data-i18n="sec_cat2_title">2. Gastronomia i Restauració</span> <span class="badge-iva" data-i18n="badge_iva_10">IVA 10% INCLÒS</span></h3>
+        <div class="table-container">
+          <table>
+            <thead><tr><th style="width: 50%;" data-i18n="th_concept">Concepte</th><th style="width: 10%;" class="text-right" data-i18n="th_units">Unitats</th><th style="width: 18%;" class="text-right" data-i18n="th_price">Preu Un. (€)</th><th style="width: 16%;" class="text-right" data-i18n="th_total">Total (€)</th><th style="width: 6%;" class="no-print"></th></tr></thead>
+            <tbody id="tbody-cat-2"></tbody>
+            <tfoot>
+              <tr class="subtotal-row">
+                <td colspan="3" class="text-right subtotal-label" data-i18n="subtotal_cat2">Subtotal Restauració (IVA inc.):</td>
+                <td class="text-right subtotal-val" id="subtotal-cat-2">0,00 €</td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button class="btn btn-primary no-print btn-add-concept" onclick="addRow('tbody-cat-2')" data-i18n="btn_add_manual">┼ Afegir línia manual</button>
+      </div>
+
+      <div class="section-category" id="sec-cat-3">
+        <h3><span data-i18n="sec_cat3_title">3. Activitats, Espais i Altres Serveis</span> <span class="badge-iva" data-i18n="badge_iva_21">IVA 21% INCLÒS</span></h3>
+        <div class="table-container">
+          <table>
+            <thead><tr><th style="width: 50%;" data-i18n="th_concept">Concepte</th><th style="width: 10%;" class="text-right" data-i18n="th_units">Unitats</th><th style="width: 18%;" class="text-right" data-i18n="th_price">Preu Un. (€)</th><th style="width: 16%;" class="text-right" data-i18n="th_total">Total (€)</th><th style="width: 6%;" class="no-print"></th></tr></thead>
+            <tbody id="tbody-cat-3"></tbody>
+            <tfoot>
+              <tr class="subtotal-row">
+                <td colspan="3" class="text-right subtotal-label" data-i18n="subtotal_cat3">Subtotal Activitats i Espais (IVA inc.):</td>
+                <td class="text-right subtotal-val" id="subtotal-cat-3">0,00 €</td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <button class="btn btn-primary no-print btn-add-concept" onclick="addRow('tbody-cat-3')" data-i18n="btn_add_manual">┼ Afegir línia manual</button>
+      </div>
+
+      <div class="summary-container">
+        <div class="summary-card">
+          <div class="summary-row"><span data-i18n="lbl_base10">Base Imposable (10%):</span><span id="base-10">0,00 €</span></div>
+          <div class="summary-row"><span data-i18n="lbl_iva10">Quota IVA (10%):</span><span id="iva-10">0,00 €</span></div>
+          <div class="summary-row" style="margin-top: 4px;"><span data-i18n="lbl_base21">Base Imposable (21%):</span><span id="base-21">0,00 €</span></div>
+          <div class="summary-row"><span data-i18n="lbl_iva21">Quota IVA (21%):</span><span id="iva-21">0,00 €</span></div>
+          <div class="summary-row total"><span data-i18n="lbl_total">TOTAL PRESSUPOST:</span><span id="total">0,00 €</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÀGINA 3: CONDICIONS GENERALS I POLÍTICA DE PAGAMENT -->
+    <div class="page-break conditions-page"></div>
+    <div class="content">
+      <div class="conditions-wrapper">
+        <h2 data-i18n="cond_title">Condicions Generals per a Grups</h2>
+
+        <div class="condition-block">
+          <h4 data-i18n="cond1_h">1. Aplicació de Tarifes</h4>
+          <p data-i18n="cond1_p">Les tarifes s'apliquen a grups a partir de 10 habitacions.</p>
+        </div>
+
+        <div class="condition-block">
+          <h4 data-i18n="cond2_h">2. Estades en Dates de Tancament al Público</h4>
+          <p data-i18n="cond2_p1">Requisit mínim: 30 habitacions dobles o 40 individuals. L'obertura exclusiva en aquestes dates requereix una producció mínima.</p>
+          <p data-i18n="cond2_p2"><strong>Caps de setmana:</strong> L'obertura exclusiva els caps de setmana implica una producció mínima divendres i dissabte.</p>
+        </div>
+
+        <div class="condition-block">
+          <h4 data-i18n="cond3_h">3. Preus i Taxes</h4>
+          <p data-i18n="cond3_p">Tarifes netes en euros, amb l'IVA vigent inclòs. Modificacions d'IVA s'aplicaran automàticament. Taxa turística no inclosa.</p>
+        </div>
+
+        <div class="condition-block">
+          <h4 data-i18n="cond4_h">4. Habitacions Individuals</h4>
+          <p data-i18n="cond4_p">En cas de superar el 20% del total reservat, podran estar subjectes a un suplement diferent.</p>
+        </div>
+
+        <div class="condition-block">
+          <h4 data-i18n="cond5_h">5. Política per a Nens</h4>
+          <ul>
+            <li data-i18n="cond5_li"><strong>0–2 anys:</strong> Gratuïts ocupant bressol. | <strong>2–12 anys:</strong> Es consideren nens. | <strong>>12 anys:</strong> Adults.</li>
+          </ul>
+        </div>
+
+        <div class="condition-block" style="border-left-color: var(--orange);">
+          <h4 style="color: var(--orange);" data-i18n="cond6_h">💳 Política de Pagament i Cancel·lació</h4>
+          <p data-i18n="cond6_p1"><strong>Pagaments:</strong> Preferiblement per transferència bancària. Oferta vàlida durant 7 dies.</p>
+          <p data-i18n="cond6_p2">Reducció del 10% de places sense penalització fins a 8 dies abans de l'arribada. Reduccions superiors es penalitzaran segons condicions.</p>
+        </div>
+
+        <div class="conditions-note" data-i18n="cond_note">
+          Nota: Aquestes condicions estan subjectes a canvis en funció de les característiques concretes del grup.
+        </div>
+      </div>
+
+      <div class="signatures">
+        <div class="signature-box">
+          <img id="img-signature" class="signature-img-preview" style="display:none;" alt="Segell i Firma">
+          <button class="btn btn-tb btn-upload-sig no-print" onclick="document.getElementById('file-sig').click()" style="color:var(--dark); border-color:var(--gray-300);" data-i18n="btn_upload_sig">🖋️ Carregar Firma/Segell</button>
+          <input type="file" id="file-sig" accept="image/*" style="display:none;" class="no-print">
+          <div data-i18n="sig_company">Signatura i Segell de l'Empresa</div>
+        </div>
+        <div class="signature-box" style="justify-content: flex-end;">
+          <div data-i18n="sig_client">Conforme Client</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" data-i18n="footer_text">
+      Vilar Rural de Sant Hilari Sacalm — Hotel 4 Estrelles en plena natura
+    </div>
+  </div>
+</div>
+
+<script>
+  // PIN D'ACCÉS PER A L'EQUIP (Pots canviar "Vilar2026" pel PIN que vulguis)
+  const ACCESS_PIN = "Vilar2026";
+
+  // URL DE GOOGLE APPS SCRIPT
+  const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxuNk_wG6jQGZxQ4LBZaSVQJHbkeYqHlgrKyG25R5I6nQjCxzOdDbmacxAjR2iAaORu/exec";
+
+  // LÒGICA D'ACCÉS / SEGURETAT
+  document.getElementById('btn-login').addEventListener('click', checkPin);
+  document.getElementById('input-pass').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkPin();
+  });
+
+  function checkPin() {
+    const val = document.getElementById('input-pass').value;
+    const errBox = document.getElementById('login-error');
+    if (val === ACCESS_PIN) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('app-main').style.display = 'block';
+    } else {
+      errBox.style.display = 'block';
+    }
+  }
+
+  function formatMoney(n) {
+    return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
+
+  const translations = {
+    ca: {
+      btn_excel: "📊 Exportar línia a Excel", btn_pdf: "📄 Descarregar PDF", btn_print: "🖨️ Imprimir",
+      doc_type: "Pressupost – Grups i Esdeveniments", establishment_title: "🏢 DADES DE L'ESTABLIMENT",
+      select_gestor: "Seleccionar Gestor/a de Grups:", client_title: "👤 CLIENT",
+      ph_client_nom: "Nom del client o empresa *", ph_client_contacte_person: "Persona de contacte *", ph_client_email: "Email de contacte *", ph_client_telefon: "Telèfon de contacte *", ph_client_adreca: "Adreça de facturació (Opcional)",
+      lbl_num_pressupost: "Nº Pressupost", lbl_fecha: "Data", lbl_validez: "Vàlid fins",
+      stay_builder_title: "⚙️ Generador Dinàmic de Servei (Eina Interna)", lbl_target_cat: "Apartat on afegir el servei",
+      opt_cat1: "1. Allotjament i Règim (10% IVA)", opt_cat2: "2. Gastronomia i Restauració (10% IVA)", opt_cat3: "3. Activitats, Espais i Equipament (21% IVA)",
+      lbl_room_type: "Tipus Habitació", lbl_occupancy: "Ocupació", lbl_adults: "Adults", lbl_children: "Nens (2-12a)", lbl_babies: "Nadons (0-2a)",
+      lbl_regimen: "Règim", lbl_nights: "Nits", lbl_night_price: "Preu Nit Calculat (€)", lbl_gastro_type: "Tipus de Servei / Menú",
+      lbl_pax: "Nº Comensals", lbl_pax_price: "Preu / PAX (€ IVA inc.)", lbl_space_type: "Espai / Activitat / Equipament", lbl_space_duration: "Durada / Concepte",
+      lbl_units: "Unitats / Dies", lbl_unit_price: "Preu Un. (€ IVA inc.)", btn_add_stay: "┼ Afegir Línia Generada",
+      details_title: "📝 Detalls de l'Esdeveniment / Estada", ph_details: "Observacions addicionals, dates de l'estada, horaris, nombre de comensals...",
+      services_header: "RELACIÓ DE SERVEIS I PRESSUPOST DETALLAT", sec_cat1_title: "1. Allotjament i Règim", sec_cat2_title: "2. Gastronomia i Restauració", sec_cat3_title: "3. Activitats, Espais i Altres Serveis",
+      badge_iva_10: "IVA 10% INCLÒS", badge_iva_21: "IVA 21% INCLÒS",
+      th_concept: "Concepte", th_units: "Unitats", th_price: "Preu Un. (€)", th_total: "Total (€)",
+      subtotal_cat1: "Subtotal Allotjament (IVA inc.):", subtotal_cat2: "Subtotal Restauració (IVA inc.):", subtotal_cat3: "Subtotal Activitats i Espais (IVA inc.):", btn_add_manual: "┼ Afegir línia manual",
+      lbl_base10: "Base Imposable (10%):", lbl_iva10: "Quota IVA (10%):", lbl_base21: "Base Imposable (21%):", lbl_iva21: "Quota IVA (21%):", lbl_total: "TOTAL PRESSUPOST:",
+      cond_title: "Condicions Generals per a Grups", cond1_h: "1. Aplicació de Tarifes", cond1_p: "Les tarifes s'apliquen a grups a partir de 10 habitacions.",
+      cond2_h: "2. Estades en Dates de Tancament al Público", cond2_p1: "Requisit mínim: 30 habitacions dobles o 40 individuals. L'obertura exclusiva en aquestes dates requereix una producció mínima.", cond2_p2: "Caps de setmana: L'obertura exclusiva els caps de setmana implica una producció mínima divendres i dissabte.",
+      cond3_h: "3. Preus i Taxes", cond3_p: "Tarifes netes en euros, amb l'IVA vigent inclòs. Modificacions d'IVA s'aplicaran automàticament. Taxa turística no inclosa.",
+      cond4_h: "4. Habitacions Individuals", cond4_p: "En cas de superar el 20% del total reservat, podran estar subjectes a un suplement diferent.",
+      cond5_h: "5. Política per a Nens", cond5_li: "0–2 anys: Gratuïts ocupant bressol. | 2–12 anys: Es consideren nens. | >12 anys: Adults.",
+      cond6_h: "💳 Política de Pagament i Cancel·lació", cond6_p1: "Pagaments: Preferiblement per transferència bancària. Oferta vàlida durant 7 dies.", cond6_p2: "Reducció del 10% de places sense penalització fins a 8 dies abans de l'arribada. Reduccions superiors es penalitzaran segons condicions.",
+      cond_note: "Nota: Aquestes condicions estan subjectes a canvis en funció de les característiques concretes del grup.",
+      btn_upload_sig: "🖋️ Carregar Firma/Segell", sig_company: "Signatura i Segell de l'Empresa", sig_client: "Conforme Client",
+      footer_text: "Vilar Rural de Sant Hilari Sacalm — Hotel 4 Estrelles en plena natura",
+      opt_jardi: "Jardí (+10%)", opt_ind: "Individual", opt_doble: "Doble", opt_triple: "Triple", opt_quad: "Quàdruple",
+      opt_menu_exec: "Menú Executiu / Treball", opt_menu_deg: "Menú Degustació Cuina de la Selva", opt_pica_pica: "Pica-pica d'Acollida", opt_sopar_gala: "Sopar de Gala",
+      opt_sala_gran: "Sala de Reunions Gran", opt_sala_mitjana: "Sala de Reunions Mitjana", opt_lloguer_jardi: "Lloguer de Gran Jardí Exterior", opt_equip_so: "Equip de So i Microfonia", opt_projector: "Projector i Pantalla HD", opt_team_building: "Activitat Team Building Guia local",
+      opt_jornada_sencera: "Jornada Sencera", opt_mitja_jornada: "Mitja Jornada", opt_servei_hores: "Servei x Hores", opt_lloguer_esdeveniment: "Lloguer per Esdeveniment",
+      room_desc: "Habitació", board_desc: "Règim", adults_txt: "Adult(s)", children_txt: "Nen(s)", babies_txt: "Nadó(ns)"
+    },
+    es: {
+      btn_excel: "📊 Exportar línea a Excel", btn_pdf: "📄 Descargar PDF", btn_print: "🖨️ Imprimir",
+      doc_type: "Presupuesto – Grupos y Eventos", establishment_title: "🏢 DATOS DEL ESTABLECIMIENTO",
+      select_gestor: "Seleccionar Gestor/a de Grupos:", client_title: "👤 CLIENTE",
+      ph_client_nom: "Nombre del cliente o empresa *", ph_client_contacte_person: "Persona de contacto *", ph_client_email: "Email de contacto *", ph_client_telefon: "Teléfono de contacto *", ph_client_adreca: "Dirección de facturación (Opcional)",
+      lbl_num_pressupost: "Nº Presupuesto", lbl_fecha: "Fecha", lbl_validez: "Válido hasta",
+      stay_builder_title: "⚙️ Generador Dinámico de Servicio (Herramienta Interna)", lbl_target_cat: "Apartado donde añadir el servicio",
+      opt_cat1: "1. Alojamiento y Régimen (10% IVA)", opt_cat2: "2. Gastronomía y Restauración (10% IVA)", opt_cat3: "3. Actividades, Espacios y Equipamiento (21% IVA)",
+      lbl_room_type: "Tipo Habitación", lbl_occupancy: "Ocupación", lbl_adults: "Adultos", lbl_children: "Niños (2-12a)", lbl_babies: "Bebés (0-2a)",
+      lbl_regimen: "Régimen", lbl_nights: "Noches", lbl_night_price: "Precio Noche Calculado (€)", lbl_gastro_type: "Tipo de Servicio / Menú",
+      lbl_pax: "Nº Comensales", lbl_pax_price: "Precio / PAX (€ IVA inc.)", lbl_space_type: "Espacio / Actividad / Equipamiento", lbl_space_duration: "Duración / Concepto",
+      lbl_units: "Unidades / Días", lbl_unit_price: "Precio Un. (€ IVA inc.)", btn_add_stay: "┼ Añadir Línea Generada",
+      details_title: "📝 Detalles del Evento / Estancia", ph_details: "Observaciones adicionales, fechas de estancia, horarios, número de comensales...",
+      services_header: "RELACIÓN DE SERVICIOS Y PRESUPUESTO DETALLADO", sec_cat1_title: "1. Alojamiento y Régimen", sec_cat2_title: "2. Gastronomía y Restauración", sec_cat3_title: "3. Actividades, Espacios y Otros Servicios",
+      badge_iva_10: "10% IVA INCLUIDO", badge_iva_21: "21% IVA INCLUIDO",
+      th_concept: "Concepto", th_units: "Unidades", th_price: "Precio Un. (€)", th_total: "Total (€)",
+      subtotal_cat1: "Subtotal Alojamiento (IVA inc.):", subtotal_cat2: "Subtotal Restauración (IVA inc.):", subtotal_cat3: "Subtotal Actividades y Espacios (IVA inc.):", btn_add_manual: "┼ Añadir línea manual",
+      lbl_base10: "Base Imposable (10%):", lbl_iva10: "Cuota IVA (10%):", lbl_base21: "Base Imposable (21%):", lbl_iva21: "Cuota IVA (21%):", lbl_total: "TOTAL PRESUPUESTO:",
+      cond_title: "Condiciones Generales para Grupos", cond1_h: "1. Aplicación de Tarifas", cond1_p: "Las tarifas se aplican a grupos a partir de 10 habitaciones.",
+      cond2_h: "2. Estancias en Fechas de Cierre al Público", cond2_p1: "Requisito mínimo: 30 habitaciones dobles o 40 individuales. La apertura exclusiva requiere producción mínima.", cond2_p2: "Fines de semana: La apertura exclusiva implica producción mínima viernes y sábado.",
+      cond3_h: "3. Precios y Tasas", cond3_p: "Tarifas netas en euros, IVA incluido. Modificaciones de IVA se aplicarán automáticamente. Tasa turística no incluida.",
+      cond4_h: "4. Habitaciones Individuales", cond4_p: "En caso de superar el 20% del total reservado, podrán estar sujetas a suplemento.",
+      cond5_h: "5. Política de Niños", cond5_li: "0–2 años: Gratis en cuna. | 2–12 años: Niños. | >12 años: Adultos.",
+      cond6_h: "💳 Política de Pago y Cancelación", cond6_p1: "Pagos: Preferentemente por transferencia bancaria. Oferta válida durante 7 días.", cond6_p2: "Reducción del 10% de plazas sin penalización hasta 8 días antes. Reducciones superiores según condiciones.",
+      cond_note: "Nota: Estas condiciones están sujetas a cambios según las características del grupo.",
+      btn_upload_sig: "🖋️ Cargar Firma/Sello", sig_company: "Firma y Sello de la Empresa", sig_client: "Conforme Cliente",
+      footer_text: "Vilar Rural de Sant Hilari Sacalm — Hotel 4 Estrellas en plena naturaleza",
+      opt_jardi: "Jardín (+10%)", opt_ind: "Individual", opt_doble: "Doble", opt_triple: "Triple", opt_quad: "Cuádruple",
+      opt_menu_exec: "Menú Ejecutivo / Trabajo", opt_menu_deg: "Menú Degustación Cocina de la Selva", opt_pica_pica: "Pica-pica de Bienvenida", opt_sopar_gala: "Cena de Gala",
+      opt_sala_gran: "Sala de Reuniones Grande", opt_sala_mitjana: "Sala de Reuniones Mediana", opt_lloguer_jardi: "Alquiler de Gran Jardín Exterior", opt_equip_so: "Equipo de Sonido y Microfonía", opt_projector: "Proyector y Pantalla HD", opt_team_building: "Actividad Team Building Guía local",
+      opt_jornada_sencera: "Jornada Completa", opt_mitja_jornada: "Media Jornada", opt_servei_hores: "Servicio x Horas", opt_lloguer_esdeveniment: "Alquiler por Evento",
+      room_desc: "Habitación", board_desc: "Régimen", adults_txt: "Adulto(s)", children_txt: "Niño(s)", babies_txt: "Bebé(s)"
+    },
+    en: {
+      btn_excel: "📊 Export row to Excel", btn_pdf: "📄 Download PDF", btn_print: "🖨️ Print",
+      doc_type: "Quotation – Groups & Events", establishment_title: "🏢 ESTABLISHMENT DETAILS",
+      select_gestor: "Select Group Manager:", client_title: "👤 CLIENT",
+      ph_client_nom: "Client or company name *", ph_client_contacte_person: "Contact person *", ph_client_email: "Contact email *", ph_client_telefon: "Contact phone *", ph_client_adreca: "Billing address (Optional)",
+      lbl_num_pressupost: "Quotation No.", lbl_fecha: "Date", lbl_validez: "Valid until",
+      stay_builder_title: "⚙️ Dynamic Service Generator (Internal Tool)", lbl_target_cat: "Section to add service",
+      opt_cat1: "1. Accommodation & Board (10% VAT)", opt_cat2: "2. Catering & Dining (10% VAT)", opt_cat3: "3. Activities, Venues & Equipment (21% VAT)",
+      lbl_room_type: "Room Type", lbl_occupancy: "Occupancy", lbl_adults: "Adults", lbl_children: "Children (2-12y)", lbl_babies: "Babies (0-2y)",
+      lbl_regimen: "Board Basis", lbl_nights: "Nights", lbl_night_price: "Calculated Price/Night (€)", lbl_gastro_type: "Service / Menu Type",
+      lbl_pax: "Guests", lbl_pax_price: "Price / Guest (€ VAT inc.)", lbl_space_type: "Venue / Activity / Equipment", lbl_space_duration: "Duration / Concept",
+      lbl_units: "Units / Days", lbl_unit_price: "Unit Price (€ VAT inc.)", btn_add_stay: "┼ Add Generated Line",
+      details_title: "📝 Event / Stay Details", ph_details: "Additional notes, stay dates, schedules, guest counts...",
+      services_header: "ITEMIZED SERVICES & DETAILED BUDGET", sec_cat1_title: "1. Accommodation & Board", sec_cat2_title: "2. Catering & Dining", sec_cat3_title: "3. Activities, Venues & Other Services",
+      badge_iva_10: "10% VAT INCLUDED", badge_iva_21: "21% VAT INCLUDED",
+      th_concept: "Item Description", th_units: "Units", th_price: "Unit Price (€)", th_total: "Total (€)",
+      subtotal_cat1: "Subtotal Accommodation (VAT inc.):", subtotal_cat2: "Subtotal Catering (VAT inc.):", subtotal_cat3: "Subtotal Activities & Venues (VAT inc.):", btn_add_manual: "┼ Add manual line",
+      lbl_base10: "Tax Base (10%):", lbl_iva10: "VAT Amount (10%):", lbl_base21: "Tax Base (21%):", lbl_iva21: "VAT Amount (21%):", lbl_total: "TOTAL QUOTATION:",
+      cond_title: "General Terms & Conditions for Groups", cond1_h: "1. Rate Application", cond1_p: "Rates apply to group bookings of 10 rooms or more.",
+      cond2_h: "2. Stays During Hotel Closure Dates", cond2_p1: "Minimum requirement: 30 double or 40 single rooms. Exclusive opening requires minimum production.", cond2_p2: "Weekends: Exclusive opening implies minimum production Friday and Saturday.",
+      cond3_h: "3. Prices & Taxes", cond3_p: "Net rates in euros including current VAT. Tourist tax not included.",
+      cond4_h: "4. Single Rooms", cond4_p: "Exceeding 20% of total rooms may be subject to a price supplement.",
+      cond5_h: "5. Child Policy", cond5_li: "0–2 yrs: Free in cot. | 2–12 yrs: Children rates. | >12 yrs: Adult rates.",
+      cond6_h: "💳 Payment & Cancellation Policy", cond6_p1: "Payments: Bank transfer preferred. Quote valid for 7 days.", cond6_p2: "Up to 10% reduction allowed without penalty up to 8 days before arrival.",
+      cond_note: "Note: Conditions subject to change based on specific group requirements.",
+      btn_upload_sig: "🖋️ Upload Signature/Stamp", sig_company: "Company Signature & Stamp", sig_client: "Accepted by Client",
+      footer_text: "Vilar Rural de Sant Hilari Sacalm — 4-Star Nature Hotel",
+      opt_jardi: "Garden (+10%)", opt_ind: "Single", opt_doble: "Double", opt_triple: "Triple", opt_quad: "Quadruple",
+      opt_menu_exec: "Executive / Work Menu", opt_menu_deg: "Selva Cuisine Tasting Menu", opt_pica_pica: "Welcome Cocktail", opt_sopar_gala: "Gala Dinner",
+      opt_sala_gran: "Large Meeting Room", opt_sala_mitjana: "Medium Meeting Room", opt_lloguer_jardi: "Large Outdoor Garden Rental", opt_equip_so: "Sound & Microphone System", opt_projector: "Projector & HD Screen", opt_team_building: "Team Building Activity with Local Guide",
+      opt_jornada_sencera: "Full Day", opt_mitja_jornada: "Half Day", opt_servei_hores: "Hourly Service", opt_lloguer_esdeveniment: "Event Rental",
+      room_desc: "Room", board_desc: "Board Basis", adults_txt: "Adult(s)", children_txt: "Child(ren)", babies_txt: "Baby(ies)"
+    },
+    fr: {
+      btn_excel: "📊 Exporter vers Excel", btn_pdf: "📄 Télécharger PDF", btn_print: "🖨️ Imprimer",
+      doc_type: "Devis – Groupes & Événements", establishment_title: "🏢 COORDONNÉES DE L'ÉTABLISSEMENT",
+      select_gestor: "Sélectionner le gestionnaire:", client_title: "👤 CLIENT",
+      ph_client_nom: "Nom du client ou de l'entreprise *", ph_client_contacte_person: "Personne de contact *", ph_client_email: "Email de contact *", ph_client_telefon: "Téléphone de contact *", ph_client_adreca: "Adresse de facturation (Optionnel)",
+      lbl_num_pressupost: "N° Devis", lbl_fecha: "Date", lbl_validez: "Valable jusqu'au",
+      stay_builder_title: "⚙️ Générateur Dynamique de Service (Outil Interne)", lbl_target_cat: "Section où ajouter le service",
+      opt_cat1: "1. Hébergement et Pension (TVA 10%)", opt_cat2: "2. Gastronomie et Restauration (TVA 10%)", opt_cat3: "3. Activités, Espaces et Équipement (TVA 21%)",
+      lbl_room_type: "Type de Chambre", lbl_occupancy: "Occupation", lbl_adults: "Adultes", lbl_children: "Enfants (2-12a)", lbl_babies: "Bébés (0-2a)",
+      lbl_regimen: "Pension", lbl_nights: "Nuits", lbl_night_price: "Prix Nuit Calculé (€)", lbl_gastro_type: "Type de Service / Menu",
+      lbl_pax: "Nbr. Couverts", lbl_pax_price: "Prix / Personne (€ TVA incl.)", lbl_space_type: "Espace / Activité / Équipement", lbl_space_duration: "Durée / Concept",
+      lbl_units: "Unités / Jours", lbl_unit_price: "Prix Un. (€ TVA incl.)", btn_add_stay: "┼ Ajouter Ligne Générée",
+      details_title: "📝 Détails de l'Événement / Séjour", ph_details: "Remarques supplémentaires, dates de séjour, horaires...",
+      services_header: "DÉTAIL DES PRESTATIONS ET DEVIS DÉTAILLÉ", sec_cat1_title: "1. Hébergement et Pension", sec_cat2_title: "2. Gastronomie et Restauration", sec_cat3_title: "3. Activités, Espaces et Autres Services",
+      badge_iva_10: "TVA 10% INCLUSE", badge_iva_21: "TVA 21% INCLUSE",
+      th_concept: "Désignation", th_units: "Unités", th_price: "Prix Un. (€)", th_total: "Total (€)",
+      subtotal_cat1: "Sous-total Hébergement (TVA incl.):", subtotal_cat2: "Sous-total Restauration (TVA incl.):", subtotal_cat3: "Sous-total Activités et Espaces (TVA incl.):", btn_add_manual: "┼ Ajouter ligne manuelle",
+      lbl_base10: "Base Imposable (10%):", lbl_iva10: "Montant TVA (10%):", lbl_base21: "Base Imposable (21%):", lbl_iva21: "Montant TVA (21%):", lbl_total: "TOTAL DEVIS:",
+      cond_title: "Conditions Générales pour les Groupes", cond1_h: "1. Application des Tarifs", cond1_p: "Les tarifs s'appliquent aux groupes à partir de 10 chambres.",
+      cond2_h: "2. Séjours pendant les Dates de Fermeture", cond2_p1: "Exigence minimale: 30 chambres doubles ou 40 simples.", cond2_p2: "Fins de semaine: L'ouverture exclusive implique une production minimale.",
+      cond3_h: "3. Prix et Taxes", cond3_p: "Tarifs nets en euros, TVA incluse. Taxe de séjour non incluse.",
+      cond4_h: "4. Chambres Simples", cond4_p: "Dépasser 20% du total des chambres peut faire l'objet d'un supplément.",
+      cond5_h: "5. Politique Enfants", cond5_li: "0–2 ans: Gratuit en lit bébé. | 2–12 ans: Tarif enfant. | >12 ans: Adultes.",
+      cond6_h: "💳 Politique de Paiement et d'Annulation", cond6_p1: "Paiements: Virement bancaire. Offre valable 7 jours.", cond6_p2: "Réduction de 10% des places sans pénalité jusqu'à 8 jours avant l'arrivée.",
+      cond_note: "Remarque: Conditions sujettes à modification selon les spécificités du groupe.",
+      btn_upload_sig: "🖋️ Charger Signature/Cachet", sig_company: "Signature et Cachet de l'Entreprise", sig_client: "Bon pour Accord Client",
+      footer_text: "Vilar Rural de Sant Hilari Sacalm — Hôtel 4 Étoiles en pleine nature",
+      opt_jardi: "Jardin (+10%)", opt_ind: "Individuelle", opt_doble: "Double", opt_triple: "Triple", opt_quad: "Quadruple",
+      opt_menu_exec: "Menu Exécutif / Travail", opt_menu_deg: "Menu Dégustation Cuisine de la Selva", opt_pica_pica: "Cocktail de Bienvenue", opt_sopar_gala: "Dîner de Gala",
+      opt_sala_gran: "Grande Salle de Réunion", opt_sala_mitjana: "Moyenne Salle de Réunion", opt_lloguer_jardi: "Location Grand Jardin Extérieur", opt_equip_so: "Système de Son & Microphones", opt_projector: "Projecteur & Écran HD", opt_team_building: "Activité Team Building avec Guide local",
+      opt_jornada_sencera: "Journée Entière", opt_mitja_jornada: "Demi-journée", opt_servei_hores: "Service à l'Heure", opt_lloguer_esdeveniment: "Location par Événement",
+      room_desc: "Chambre", board_desc: "Pension", adults_txt: "Adultes", children_txt: "Enfants", babies_txt: "Bébés"
+    }
+  };
+
+  let currentLang = 'ca';
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    const dict = translations[lang] || translations.ca;
+    
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) el.textContent = dict[key];
+    });
+
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const key = el.getAttribute('data-i18n-ph');
+      if (dict[key]) el.placeholder = dict[key];
+    });
+
+    document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+      const key = el.getAttribute('data-i18n-opt');
+      if (dict[key]) el.textContent = dict[key];
+    });
+  }
+
+  document.getElementById('sel-lang').addEventListener('change', function() {
+    setLanguage(this.value);
+  });
+
+  const gestorsData = {
+    "1": {
+      prefix: "1",
+      nom: "Joan Munné",
+      carrec: "Groups Controller",
+      contacte: "Tel. (+34) 93 419 36 77 (opció 2) | comercial.hotels@grupserhs.com",
+      initials: "JM"
+    },
+    "2": {
+      prefix: "2",
+      nom: "Miquel Navarro",
+      carrec: "Gestor de grups",
+      contacte: "Tel. (+34) 93 419 36 77 (opció 4) | comercial.hotels@grupserhs.com",
+      initials: "MN"
+    },
+    "3": {
+      prefix: "3",
+      nom: "Equip de Grups",
+      carrec: "Atenció a Grups i Esdeveniments",
+      contacte: "Tel. (+34) 93 419 36 77 | comercial.hotels@grupserhs.com",
+      initials: "EG"
+    }
+  };
+
+  function getNextQuotationNumber(autoIncrement = false) {
+    const gestorKey = document.getElementById('sel-gestor').value;
+    const gestorInfo = gestorsData[gestorKey] || gestorsData["1"];
+    const currentYear = new Date().getFullYear();
+    
+    const storageYearKey = `vr_year_g${gestorInfo.prefix}`;
+    const storageCounterKey = `vr_counter_g${gestorInfo.prefix}`;
+
+    const storedYear = localStorage.getItem(storageYearKey);
+    let storedCounter = parseInt(localStorage.getItem(storageCounterKey)) || 0;
+
+    if (storedYear !== String(currentYear)) {
+      storedCounter = 0;
+      localStorage.setItem(storageYearKey, currentYear);
+    }
+
+    if (autoIncrement) {
+      storedCounter++;
+      localStorage.setItem(storageCounterKey, storedCounter);
+    } else if (storedCounter === 0) {
+      storedCounter = 1;
+      localStorage.setItem(storageCounterKey, storedCounter);
+    }
+
+    const numPadded = String(storedCounter).padStart(3, '0');
+    return `${gestorInfo.prefix}-PRES-${currentYear}-${numPadded}`;
+  }
+
+  document.getElementById('btn-next-num').addEventListener('click', () => {
+    document.getElementById('num-pressupost').value = getNextQuotationNumber(true);
+  });
+
+  document.getElementById('sel-gestor').addEventListener('change', function() {
+    const data = gestorsData[this.value];
+    if (data) {
+      document.getElementById('gestor-nom').textContent = data.nom;
+      document.getElementById('gestor-carrec').textContent = data.carrec;
+      document.getElementById('gestor-tel-email').textContent = data.contacte;
+      
+      const fotoImg = document.getElementById('gestor-foto');
+      const fallbackDiv = document.getElementById('gestor-fallback');
+      
+      fallbackDiv.textContent = data.initials;
+      fotoImg.style.display = 'none';
+      fallbackDiv.style.display = 'flex';
+
+      document.getElementById('num-pressupost').value = getNextQuotationNumber(false);
+    }
+  });
+
+  document.getElementById('file-gestor').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('gestor-foto').src = evt.target.result;
+        document.getElementById('gestor-foto').style.display = 'block';
+        document.getElementById('gestor-fallback').style.display = 'none';
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById('sel-target-cat').addEventListener('change', function() {
+    const val = this.value;
+    document.getElementById('fields-cat-1').style.display = (val === 'cat-1') ? 'grid' : 'none';
+    document.getElementById('fields-cat-2').style.display = (val === 'cat-2') ? 'grid' : 'none';
+    document.getElementById('fields-cat-3').style.display = (val === 'cat-3') ? 'grid' : 'none';
+  });
+
+  document.getElementById('file-logo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const logoImg = document.getElementById('img-logo');
+        logoImg.src = evt.target.result;
+        logoImg.style.display = 'block';
+        document.getElementById('fallback-logo').style.display = 'none';
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById('file-sig').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const sigImg = document.getElementById('img-signature');
+        sigImg.src = evt.target.result;
+        sigImg.style.display = 'block';
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  function calculateStayPrice() {
+    const basePrice = parseFloat(document.getElementById('base-price-adult').value) || 0;
+    const tipo = document.getElementById('sel-tipo').value;
+    const numAdults = parseInt(document.getElementById('num-adultos').value) || 0;
+    const numNinos = parseInt(document.getElementById('num-ninos').value) || 0;
+    const numBebes = parseInt(document.getElementById('num-bebes').value) || 0;
+    const regimen = document.getElementById('sel-regimen').value;
+    const discount = parseFloat(document.getElementById('disc-cat-1').value) || 0;
+    
+    const begudesSel = document.getElementById('sel-begudes');
+    const cafeChk = document.getElementById('chk-cafe');
+    const alertBox = document.getElementById('validation-msg');
+    const addBtn = document.getElementById('btn-add-stay');
+
+    if (regimen === 'SA' || regimen === 'AD') {
+      begudesSel.disabled = true;
+      begudesSel.value = 'none';
+      cafeChk.disabled = true;
+      cafeChk.checked = false;
+    } else {
+      begudesSel.disabled = false;
+      cafeChk.disabled = false;
+    }
+
+    const begudes = begudesSel.value;
+    const isCafeChecked = cafeChk.checked;
+
+    let isValidCombo = false;
+    const comboKey = `${numAdults}+${numNinos}`;
+
+    if (tipo === 'confort' || tipo === 'baby_room') {
+      if (['1+0', '1+1', '1+2', '2+0', '2+1', '3+0'].includes(comboKey)) isValidCombo = true;
+    } else if (tipo === 'confort_quad' || tipo === 'baby_quad') {
+      if (['2+2', '3+1', '4+0'].includes(comboKey)) isValidCombo = true;
+    } else if (tipo === 'suite') {
+      if (['1+1', '1+2', '2+0', '2+1', '2+2', '3+0', '3+1', '4+0'].includes(comboKey)) isValidCombo = true;
+    } else if (tipo === 'jardi') {
+      if (['1+0', '1+1', '1+2', '2+0', '2+1', '2+2', '2+3', '3+0', '3+1', '3+2', '4+0', '4+1'].includes(comboKey)) isValidCombo = true;
+    }
+
+    if (['2+3', '3+2', '4+1'].includes(comboKey) && numBebes > 0) {
+      isValidCombo = false;
+    }
+
+    if (numBebes > 2) {
+      isValidCombo = false;
+    }
+
+    if (!isValidCombo || numAdults <= 0) {
+      alertBox.style.display = 'block';
+      addBtn.disabled = true;
+      document.getElementById('stay-price').value = "0.00";
+      return;
+    } else {
+      alertBox.style.display = 'none';
+      addBtn.disabled = false;
+    }
+
+    let roomMultiplier = 1.0;
+    if (tipo === 'jardi') roomMultiplier = 1.10;
+    else if (tipo === 'baby_room') roomMultiplier = 1.15;
+    else if (tipo === 'confort_quad' || tipo === 'baby_quad') roomMultiplier = 1.20;
+    else if (tipo === 'suite') roomMultiplier = 1.30;
+
+    const adultRoomBase = basePrice * roomMultiplier;
+    let totalPrice = 0;
+
+    if (numAdults === 1) {
+      if (numNinos === 0) {
+        totalPrice += adultRoomBase * 1.80;
+      } else {
+        totalPrice += adultRoomBase;
+        totalPrice += adultRoomBase;
+        for (let i = 2; i <= numNinos; i++) {
+          totalPrice += (i === 2) ? adultRoomBase * 0.60 : adultRoomBase * 0.50;
+        }
+      }
+    } else {
+      for (let i = 1; i <= numAdults; i++) {
+        totalPrice += (i <= 2) ? adultRoomBase : adultRoomBase * 0.70;
+      }
+      for (let i = 1; i <= numNinos; i++) {
+        totalPrice += (i <= 2) ? adultRoomBase * 0.60 : adultRoomBase * 0.50;
+      }
+    }
+
+    let regimenAdult = 0, regimenNen = 0;
+    if (regimen === 'SA') { regimenAdult = -5; regimenNen = -2.5; }
+    else if (regimen === 'MP') { regimenAdult = 20; regimenNen = 14; }
+    else if (regimen === 'PC') { regimenAdult = 40; regimenNen = 28; }
+
+    totalPrice += (numAdults * regimenAdult) + (numNinos * regimenNen);
+
+    let mealsFactor = 0;
+    if (regimen === 'MP') mealsFactor = 1;
+    else if (regimen === 'PC') mealsFactor = 2;
+
+    if (mealsFactor > 0) {
+      let begudaAdult = 0, begudaNen = 0;
+      if (begudes === 'aigua_vi') { begudaAdult = 3; begudaNen = 2; }
+      else if (begudes === 'refrescos') { begudaAdult = 6; begudaNen = 5; }
+
+      totalPrice += ((numAdults * begudaAdult) + (numNinos * begudaNen)) * mealsFactor;
+
+      if (isCafeChecked) {
+        totalPrice += (numAdults * 3) * mealsFactor;
+      }
+    }
+
+    if (discount > 0) {
+      totalPrice = totalPrice * (1 - (discount / 100));
+    }
+
+    document.getElementById('stay-price').value = totalPrice.toFixed(2);
+  }
+
+  ['base-price-adult', 'sel-tipo', 'num-adultos', 'num-ninos', 'num-bebes', 'sel-regimen', 'sel-begudes', 'chk-cafe', 'disc-cat-1'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calculateStayPrice);
+    document.getElementById(id).addEventListener('change', calculateStayPrice);
+  });
+
+  function getSumByTbody(tbodyId) {
+    let sum = 0;
+    const tbody = document.getElementById(tbodyId);
+    tbody.querySelectorAll('tr').forEach(row => {
+      const cant = parseFloat(row.querySelector('.cant').value) || 0;
+      const precio = parseFloat(row.querySelector('.precio').value) || 0;
+      const total = cant * precio;
+      row.querySelector('.total-cell').textContent = formatMoney(total);
+      sum += total;
+    });
+    return sum;
+  }
+
+  function calcular() {
+    const subCat1_inc = getSumByTbody('tbody-cat-1');
+    const subCat2_inc = getSumByTbody('tbody-cat-2');
+    const subCat3_inc = getSumByTbody('tbody-cat-3');
+
+    document.getElementById('subtotal-cat-1').textContent = formatMoney(subCat1_inc);
+    document.getElementById('subtotal-cat-2').textContent = formatMoney(subCat2_inc);
+    document.getElementById('subtotal-cat-3').textContent = formatMoney(subCat3_inc);
+
+    const total10_inc = subCat1_inc + subCat2_inc;
+    const base10 = total10_inc / 1.10;
+    const iva10 = total10_inc - base10;
+
+    const total21_inc = subCat3_inc;
+    const base21 = total21_inc / 1.21;
+    const iva21 = total21_inc - base21;
+
+    const totalGeneral = total10_inc + total21_inc;
+
+    document.getElementById('base-10').textContent = formatMoney(base10);
+    document.getElementById('iva-10').textContent = formatMoney(iva10);
+    document.getElementById('base-21').textContent = formatMoney(base21);
+    document.getElementById('iva-21').textContent = formatMoney(iva21);
+    document.getElementById('total').textContent = formatMoney(totalGeneral);
+  }
+
+  function addRow(tbodyId, desc = '', cant = 1, precio = 0) {
+    const tbody = document.getElementById(tbodyId);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="desc" value="${desc}" placeholder="Descripció del servei"></td>
+      <td class="text-right"><input type="number" class="cant text-right" value="${cant}" min="0"></td>
+      <td class="text-right"><input type="number" class="precio text-right" value="${precio}" min="0" step="0.01"></td>
+      <td class="text-right total-cell" style="font-weight:600; color:var(--primary);">0,00 €</td>
+      <td class="no-print text-right"><button class="btn-icon btn-borrar">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    tr.querySelectorAll('input').forEach(i => i.addEventListener('input', calcular));
+    tr.querySelector('.btn-borrar').addEventListener('click', () => { tr.remove(); calcular(); });
+    calcular();
+  }
+
+  function validateClientFields() {
+    const nom = document.getElementById('client-nom').value.trim();
+    const contacte = document.getElementById('client-contacte-person').value.trim();
+    const email = document.getElementById('client-email').value.trim();
+    const telefon = document.getElementById('client-telefon').value.trim();
+
+    if (!nom || !contacte || !email || !telefon) {
+      alert("⚠️ Si us plau, omple tots els camps obligatoris del Client (Nom, Persona de Contacte, Email i Telèfon).");
+      return false;
+    }
+    return true;
+  }
+
+  function sendToGoogleSheet() {
+    if (!GOOGLE_SHEET_URL) return;
+
+    const subCat1_inc = getSumByTbody('tbody-cat-1');
+    const subCat2_inc = getSumByTbody('tbody-cat-2');
+    const subCat3_inc = getSumByTbody('tbody-cat-3');
+
+    const total10_inc = subCat1_inc + subCat2_inc;
+    const base10 = total10_inc / 1.10;
+    const iva10 = total10_inc - base10;
+
+    const total21_inc = subCat3_inc;
+    const base21 = total21_inc / 1.21;
+    const iva21 = total21_inc - base21;
+
+    const totalGeneral = total10_inc + total21_inc;
+
+    const payload = {
+      num: document.getElementById('num-pressupost').value || '',
+      fecha: document.getElementById('fecha').value || '',
+      validez: document.getElementById('validez').value || '',
+      client: document.getElementById('client-nom').value || '',
+      contactePerson: document.getElementById('client-contacte-person').value || '',
+      email: document.getElementById('client-email').value || '',
+      telefon: document.getElementById('client-telefon').value || '',
+      gestor: document.getElementById('gestor-nom').textContent || '',
+      subCat1: subCat1_inc.toFixed(2),
+      subCat2: subCat2_inc.toFixed(2),
+      subCat3: subCat3_inc.toFixed(2),
+      base10: base10.toFixed(2),
+      iva10: iva10.toFixed(2),
+      base21: base21.toFixed(2),
+      iva21: iva21.toFixed(2),
+      total: totalGeneral.toFixed(2)
+    };
+
+    fetch(GOOGLE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(err => console.warn("Error enviant a Google Sheet:", err));
+  }
+
+  document.getElementById('btn-add-stay').addEventListener('click', () => {
+    const targetCat = document.getElementById('sel-target-cat').value;
+    const tbodyId = targetCat.replace('cat-', 'tbody-cat-');
+    const dict = translations[currentLang] || translations.ca;
+
+    if (targetCat === 'cat-1') {
+      const tipoSel = document.getElementById('sel-tipo');
+      let tipoText = tipoSel.options[tipoSel.selectedIndex].text.split('(')[0].trim();
+      if (currentLang === 'en') {
+        if (tipoSel.value === 'jardi') tipoText = "Garden Room";
+        else if (tipoSel.value === 'confort') tipoText = "Confort Room";
+        else if (tipoSel.value === 'confort_quad') tipoText = "Quadruple Confort Room";
+        else if (tipoSel.value === 'suite') tipoText = "Suite Room";
+        else if (tipoSel.value === 'baby_room') tipoText = "Baby Room";
+        else if (tipoSel.value === 'baby_quad') tipoText = "Quadruple Baby Room";
+      }
+      
+      const numAdults = parseInt(document.getElementById('num-adultos').value) || 0;
+      const numNinos = parseInt(document.getElementById('num-ninos').value) || 0;
+      const numBebes = parseInt(document.getElementById('num-bebes').value) || 0;
+      const regimen = document.getElementById('sel-regimen').value;
+      const nights = document.getElementById('stay-nights').value;
+      const precioCalculat = parseFloat(document.getElementById('stay-price').value) || 0;
+      const disc = parseFloat(document.getElementById('disc-cat-1').value) || 0;
+
+      const begudesVal = document.getElementById('sel-begudes').value;
+      const isCafeChecked = document.getElementById('chk-cafe').checked;
+
+      let paxText = `${numAdults} ${dict.adults_txt}`;
+      if (numNinos > 0) paxText += `, ${numNinos} ${dict.children_txt}`;
+      if (numBebes > 0) paxText += `, ${numBebes} ${dict.babies_txt}`;
+
+      let icons = '';
+      if (regimen === 'MP' || regimen === 'PC') {
+        if (begudesVal === 'aigua_vi') icons += ' 🍷';
+        else if (begudesVal === 'refrescos') icons += ' 🥤';
+        if (isCafeChecked) icons += ' ☕';
+      }
+
+      let discTag = disc > 0 ? ` [Desc. ${disc}%]` : '';
+      const conceptDesc = `${dict.room_desc} ${tipoText} - ${dict.board_desc} ${regimen} [${paxText}]${icons}${discTag}`;
+      addRow(tbodyId, conceptDesc, nights, precioCalculat);
+
+    } else if (targetCat === 'cat-2') {
+      const gastroSel = document.getElementById('gastro-tipo');
+      let servicioText = gastroSel.options[gastroSel.selectedIndex].getAttribute('data-i18n-opt') ? dict[gastroSel.options[gastroSel.selectedIndex].getAttribute('data-i18n-opt')] : gastroSel.value;
+      const pax = document.getElementById('gastro-pax').value;
+      let precio = parseFloat(document.getElementById('gastro-price').value) || 0;
+      const disc = parseFloat(document.getElementById('disc-cat-2').value) || 0;
+
+      if (disc > 0) {
+        precio = precio * (1 - (disc / 100));
+        servicioText += ` [Desc. ${disc}%]`;
+      }
+
+      addRow(tbodyId, servicioText, pax, precio);
+
+    } else if (targetCat === 'cat-3') {
+      const spaceSel = document.getElementById('space-tipo');
+      let espacioText = spaceSel.options[spaceSel.selectedIndex].getAttribute('data-i18n-opt') ? dict[spaceSel.options[spaceSel.selectedIndex].getAttribute('data-i18n-opt')] : spaceSel.value;
+      
+      const durSel = document.getElementById('space-dur');
+      const durText = durSel.options[durSel.selectedIndex].getAttribute('data-i18n-opt') ? dict[durSel.options[durSel.selectedIndex].getAttribute('data-i18n-opt')] : durSel.value;
+
+      const units = document.getElementById('space-units').value;
+      let precio = parseFloat(document.getElementById('space-price').value) || 0;
+      const disc = parseFloat(document.getElementById('disc-cat-3').value) || 0;
+
+      if (disc > 0) {
+        precio = precio * (1 - (disc / 100));
+        espacioText += ` [Desc. ${disc}%]`;
+      }
+
+      const conceptDesc = `${espacioText} (${durText})`;
+      addRow(tbodyId, conceptDesc, units, precio);
+    }
+  });
+
+  document.getElementById('btn-excel').addEventListener('click', () => {
+    if (!validateClientFields()) return;
+
+    sendToGoogleSheet();
+
+    const num = document.getElementById('num-pressupost').value || '';
+    const fecha = document.getElementById('fecha').value || '';
+    const validez = document.getElementById('validez').value || '';
+    const client = (document.getElementById('client-nom').value || 'Sense Client').replace(/;/g, ' ');
+    const gestor = document.getElementById('gestor-nom').textContent;
+
+    const subCat1_inc = getSumByTbody('tbody-cat-1');
+    const subCat2_inc = getSumByTbody('tbody-cat-2');
+    const subCat3_inc = getSumByTbody('tbody-cat-3');
+
+    const total10_inc = subCat1_inc + subCat2_inc;
+    const base10 = total10_inc / 1.10;
+    const iva10 = total10_inc - base10;
+
+    const total21_inc = subCat3_inc;
+    const base21 = total21_inc / 1.21;
+    const iva21 = total21_inc - base21;
+
+    const totalGeneral = total10_inc + total21_inc;
+
+    const csvContent = "N_PRESSUPOST;DATA;VALID_FINS;CLIENT;GESTOR;SUBTOTAL_ALLOTJAMENT_INC;SUBTOTAL_RESTAURACIO_INC;SUBTOTAL_ACTIVITATS_INC;BASE_10;IVA_10;BASE_21;IVA_21;TOTAL_GENERAL\n" +
+      `"${num}";"${fecha}";"${validez}";"${client}";"${gestor}";"${subCat1_inc.toFixed(2)}";"${subCat2_inc.toFixed(2)}";"${subCat3_inc.toFixed(2)}";"${base10.toFixed(2)}";"${iva10.toFixed(2)}";"${base21.toFixed(2)}";"${iva21.toFixed(2)}";"${totalGeneral.toFixed(2)}"`;
+
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Registre_${num || 'Pressupost'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  function generateFilename() {
+    const num = (document.getElementById('num-pressupost').value || 'PRES').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const client = (document.getElementById('client-nom').value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '_');
+    
+    const dataInput = document.getElementById('fecha').value;
+    let dataFormatted = '';
+    
+    if (dataInput) {
+      const parts = dataInput.split('-');
+      dataFormatted = `${parts[2]}${parts[1]}${parts[0]}`;
+    } else {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      dataFormatted = `${dd}${mm}${yyyy}`;
+    }
+
+    return `${num}_${dataFormatted}_${client}_VilarRural.pdf`;
+  }
+
+  document.getElementById('btn-pdf').addEventListener('click', function () {
+    if (!validateClientFields()) return;
+
+    sendToGoogleSheet();
+
+    const element = document.getElementById('quotation-doc');
+    const noPrintElements = document.querySelectorAll('.no-print');
+
+    noPrintElements.forEach(el => el.style.display = 'none');
+
+    const hiddenCategories = [];
+    ['1', '2', '3'].forEach(num => {
+      const tbody = document.getElementById(`tbody-cat-${num}`);
+      const sec = document.getElementById(`sec-cat-${num}`);
+      if (tbody.children.length === 0) {
+        sec.style.display = 'none';
+        hiddenCategories.push(sec);
+      }
+    });
+
+    const dynamicFilename = generateFilename();
+
+    const opt = {
+      margin: 5,
+      filename: dynamicFilename,
+      html2canvas: { scale: 2, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      noPrintElements.forEach(el => el.style.display = '');
+      hiddenCategories.forEach(sec => sec.style.display = 'block');
+      
+      document.getElementById('num-pressupost').value = getNextQuotationNumber(true);
+    }).catch(err => {
+      console.warn("Error generant PDF:", err);
+      noPrintElements.forEach(el => el.style.display = '');
+      hiddenCategories.forEach(sec => sec.style.display = 'block');
+    });
+  });
+
+  document.getElementById('num-pressupost').value = getNextQuotationNumber(false);
+  document.getElementById('fecha').valueAsDate = new Date();
+  const v = new Date(); v.setDate(v.getDate() + 15);
+  document.getElementById('validez').valueAsDate = v;
+
+  calculateStayPrice();
+</script>
+</body>
+</html>
