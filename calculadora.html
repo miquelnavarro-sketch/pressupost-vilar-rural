@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Preus - Vilar Rural Sant Hilari Sacalm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e5631;
+      --primary-light: #4a7c59;
+      --accent: #b5c934;
+      --orange: #e67e22;
+      --dark: #1f2937;
+      --light: #f4f6f0;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-700: #374151;
+      --danger: #ef4444;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--light); color: var(--dark); line-height: 1.45; padding: 20px; }
+
+    /* PANTALLA DE SEGURETAT */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: var(--dark);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    .login-box {
+      background: white; padding: 32px; border-radius: 16px;
+      max-width: 400px; width: 90%; text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-top: 5px solid var(--accent);
+    }
+    .login-title { font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; }
+    .login-subtitle { font-size: 12px; color: var(--gray-700); margin-bottom: 20px; }
+    .login-error { color: var(--danger); font-size: 12px; font-weight: 700; margin-top: 10px; display: none; }
+
+    .calc-container { max-width: 900px; margin: 0 auto; background: var(--white); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(30,86,49,0.15); overflow: hidden; display: none; }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white; padding: 24px 32px 0 32px; text-align: center; border-bottom: 5px solid var(--accent);
+    }
+    .header h1 { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header p { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; margin-bottom: 16px; }
+
+    /* PESTANYES */
+    .nav-tabs { display: flex; justify-content: center; gap: 8px; }
+    .tab-btn {
+      background: rgba(255,255,255,0.15); color: white; border: none;
+      padding: 10px 20px; border-radius: 10px 10px 0 0; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .tab-btn.active { background: var(--white); color: var(--primary); }
+
+    .content { padding: 30px; }
+
+    .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 16px; }
+    .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group:last-child { margin-bottom: 0; }
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; text-transform: uppercase; }
+    input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--dark); background: white; font-weight: 500; }
+    input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(30,86,49,0.1); }
+
+    .validation-alert { font-size: 12px; font-weight: 700; color: var(--danger); background: #fef2f2; padding: 10px 14px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px; display: none; text-align: center; }
+
+    /* PANNELL DE RESULTATS */
+    .results-panel { background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: var(--radius); padding: 24px; }
+    .results-header { font-size: 13px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--accent); padding-bottom: 8px; margin-bottom: 16px; }
+
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .stat-box { background: white; padding: 18px; border-radius: 10px; border: 1px solid var(--gray-200); text-align: center; }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--gray-700); text-transform: uppercase; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--primary); }
+    .stat-value.highlight { color: var(--orange); font-size: 28px; }
+
+    .breakdown-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+    .breakdown-table td { padding: 6px 0; border-bottom: 1px dashed var(--gray-300); color: var(--gray-700); }
+    .breakdown-table td:last-child { text-align: right; font-weight: 700; color: var(--dark); }
+    .breakdown-table tr:last-child td { border-bottom: none; font-weight: 800; font-size: 13px; color: var(--primary); padding-top: 10px; }
+
+    .btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    .footer { text-align: center; padding: 16px 12px; background: var(--dark); color: white; font-size: 11px; line-height: 1.6; }
+    .footer-author { font-weight: 700; color: var(--accent); letter-spacing: 0.3px; }
+  </style>
+</head>
+<body>
+
+<!-- PANTALLA DE SEGURETAT -->
+<div id="login-overlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-title">Vilar Rural Sant Hilari</div>
+    <div class="login-subtitle">Consultora i Calculadora de Preus (Ús Intern)</div>
+    <div class="form-group">
+      <input type="password" id="input-pass" placeholder="Introdueix el PIN d'accés" style="text-align: center; font-size: 16px;">
+    </div>
+    <button class="btn btn-accent" id="btn-login" style="width: 100%; margin-top: 8px;">Accedir a l'aplicació</button>
+    <div id="login-error" class="login-error">⚠️ PIN d'accés incorrecte</div>
+  </div>
+</div>
+
+<div class="calc-container" id="app-main">
+  <div class="header">
+    <h1>Consultora de Tarifes d'Allotjament</h1>
+    <p>Eina de consulta i càlcul de preus per a la recepció i l'equip de vendes</p>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tab-direct" onclick="switchTab('direct')">🧮 Càlcul Directe (Preu Base)</button>
+      <button class="tab-btn" id="tab-inverse" onclick="switchTab('inverse')">🔄 Càlcul Invers (Des de Preu Conegut)</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="validation-msg" class="validation-alert">⚠️ Ocupació no permesa per a aquest tipus d'habitació</div>
+
+    <!-- MODE 1: CÀLCUL DIRECTE -->
+    <div id="view-direct">
+      <div class="grid-form">
+        <div class="card">
+          <div class="card-title">🛏️ Habitació i Nit</div>
+          <div class="form-group">
+            <label>Preu Base Adult (€)</label>
+            <input type="number" id="dir-base-price" value="50.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Tipus d'Habitació</label>
+            <select id="dir-sel-tipo">
+              <option value="confort">Confort</option>
+              <option value="confort_quad">Confort Quàdruple</option>
+              <option value="jardi">Jardí (+10%)</option>
+              <option value="baby_room">Baby Room (+15%)</option>
+              <option value="baby_quad">Baby Quad (+20%)</option>
+              <option value="suite">Suite (+30%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nombre de Nits</label>
+            <input type="number" id="dir-nights" value="1" min="1">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">👥 Ocupació</div>
+          <div class="form-group"><label>Adults</label><input type="number" id="dir-adults" value="2" min="1" max="4"></div>
+          <div class="form-group"><label>Nens (2-12a)</label><input type="number" id="dir-ninos" value="0" min="0" max="3"></div>
+          <div class="form-group"><label>Nadons (0-2a)</label><input type="number" id="dir-bebes" value="0" min="0" max="2"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🍽️ Règim i Extres</div>
+          <div class="form-group">
+            <label>Règim d'Estada</label>
+            <select id="dir-sel-regimen">
+              <option value="AD" selected>AD (Esmorzar inclòs)</option>
+              <option value="MP">MP (Mitja Pensió +20€/+14€)</option>
+              <option value="PC">PC (Pensió Completa +40€/+28€)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mascotes (+17€/nit, sense descompte)</label>
+            <select id="dir-mascotas">
+              <option value="0" selected>Sense mascota</option>
+              <option value="1">1 Mascota (+17€/nit)</option>
+              <option value="2">2 Mascotes (+34€/nit)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label style="color:var(--orange);">Descompte Allotjament/Règim (%)</label>
+            <input type="number" id="dir-disc" value="0" min="0" max="100" placeholder="0%">
+          </div>
+        </div>
+      </div>
+
+      <div class="results-panel">
+        <div class="results-header">📊 Resultat de la Consulta (Càlcul Directe)</div>
+        <div class="results-grid">
+          <div class="stat-box"><div class="stat-label">Preu Nit (IVA Inc.)</div><div class="stat-value" id="dir-res-night">0,00 €</div></div>
+          <div class="stat-box"><div class="stat-label">Total Estada (IVA Inc.)</div><div class="stat-value highlight" id="dir-res-total">0,00 €</div></div>
+          <div class="stat-box"><div class="stat-label">Mitjana Nit / Persona</div><div class="stat-value" id="dir-res-pax">0,00 €</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 2: CÀLCUL INVERS / COMPARADOR -->
+    <div id="view-inverse" style="display: none;">
+      <div class="grid-form">
+        <!-- DADES CONEGUDES / ORIGEN -->
+        <div class="card" style="border-left: 4px solid var(--orange);">
+          <div class="card-title" style="color:var(--orange);">📌 Tarifa Origen / Coneguda</div>
+          <div class="form-group">
+            <label>Preu Nit Conegut (€ IVA Inc.)</label>
+            <input type="number" id="inv-known-price" value="150.00" step="0.01" style="font-weight:700; color:var(--orange);">
+          </div>
+          <div class="form-group">
+            <label>Tipus Habitació Actual</label>
+            <select id="inv-orig-tipo">
+              <option value="confort">Confort</option>
+              <option value="confort_quad">Confort Quàdruple</option>
+              <option value="jardi">Jardí (+10%)</option>
+              <option value="baby_room">Baby Room (+15%)</option>
+              <option value="baby_quad">Baby Quad (+20%)</option>
+              <option value="suite">Suite (+30%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Adults</label><input type="number" id="inv-orig-adults" value="2" min="1" max="4"></div>
+          <div class="form-group"><label>Nens (2-12a)</label><input type="number" id="inv-orig-ninos" value="0" min="0" max="3"></div>
+          <div class="form-group">
+            <label>Règim Actual</label>
+            <select id="inv-orig-regimen">
+              <option value="AD" selected>AD</option>
+              <option value="MP">MP</option>
+              <option value="PC">PC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mascotes Actuals</label>
+            <select id="inv-orig-mascotas">
+              <option value="0" selected>Sense mascota</option>
+              <option value="1">1 Mascota (+17€/nit)</option>
+              <option value="2">2 Mascotes (+34€/nit)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- TARGET / COMPARADOR -->
+        <div class="card" style="border-left: 4px solid var(--primary);">
+          <div class="card-title">🎯 Nova Opció a Comparar</div>
+          <div class="form-group">
+            <label>Nou Tipus Habitació</label>
+            <select id="inv-target-tipo">
+              <option value="confort">Confort</option>
+              <option value="confort_quad">Confort Quàdruple</option>
+              <option value="jardi">Jardí (+10%)</option>
+              <option value="baby_room">Baby Room (+15%)</option>
+              <option value="baby_quad">Baby Quad (+20%)</option>
+              <option value="suite" selected>Suite (+30%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Adults</label><input type="number" id="inv-target-adults" value="2" min="1" max="4"></div>
+          <div class="form-group"><label>Nens (2-12a)</label><input type="number" id="inv-target-ninos" value="0" min="0" max="3"></div>
+          <div class="form-group">
+            <label>Nou Règim</label>
+            <select id="inv-target-regimen">
+              <option value="AD">AD</option>
+              <option value="MP" selected>MP</option>
+              <option value="PC">PC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Noves Mascotes</label>
+            <select id="inv-target-mascotas">
+              <option value="0" selected>Sense mascota</option>
+              <option value="1">1 Mascota (+17€/nit)</option>
+              <option value="2">2 Mascotes (+34€/nit)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nombre de Nits</label>
+            <input type="number" id="inv-nights" value="1" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="results-panel">
+        <div class="results-header">🔍 Resultat del Càlcul Invers i Comparativa</div>
+        <div class="results-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="stat-box">
+            <div class="stat-label">Nou Preu Nit (IVA Inc.)</div>
+            <div class="stat-value highlight" id="inv-res-new-night">0,00 €</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Diferència x Nit</div>
+            <div class="stat-value highlight" id="inv-res-diff" style="color: var(--primary);">0,00 €</div>
+          </div>
+        </div>
+        <table class="breakdown-table">
+          <tr><td>Preu Nit de l'Opció Origen</td><td id="inv-bk-orig">0,00 €</td></tr>
+          <tr><td>Preu Nit de la Nova Opció Comparada</td><td id="inv-bk-target">0,00 €</td></tr>
+          <tr><td>TOTAL NOVA ESTADA COMPLETA</td><td id="inv-bk-total-estada">0,00 €</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Vilar Rural de Sant Hilari Sacalm — Eina interna de consulta i comparativa de tarifes<br>
+    <span class="footer-author">Desenvolupat per Miquel Navarro per a la gestió eficient de Vilar Rural</span>
+  </div>
+</div>
+
+<script>
+  const ACCESS_PIN = "Vilar2026";
+
+  document.getElementById('btn-login').addEventListener('click', checkPin);
+  document.getElementById('input-pass').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkPin();
+  });
+
+  function checkPin() {
+    const val = document.getElementById('input-pass').value;
+    const errBox = document.getElementById('login-error');
+    if (val === ACCESS_PIN) {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('app-main').style.display = 'block';
+    } else {
+      errBox.style.display = 'block';
+    }
+  }
+
+  function formatMoney(n) {
+    return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
+
+  function checkComboValid(tipo, adults, ninos, bebes) {
+    let isValid = false;
+    const comboKey = `${adults}+${ninos}`;
+
+    if (tipo === 'confort' || tipo === 'baby_room') {
+      if (['1+0', '1+1', '1+2', '2+0', '2+1', '3+0'].includes(comboKey)) isValid = true;
+    } else if (tipo === 'confort_quad' || tipo === 'baby_quad') {
+      if (['2+2', '3+1', '4+0'].includes(comboKey)) isValid = true;
+    } else if (tipo === 'suite') {
+      if (['1+1', '1+2', '2+0', '2+1', '2+2', '3+0', '3+1', '4+0'].includes(comboKey)) isValid = true;
+    } else if (tipo === 'jardi') {
+      if (['1+0', '1+1', '1+2', '2+0', '2+1', '2+2', '2+3', '3+0', '3+1', '3+2', '4+0', '4+1'].includes(comboKey)) isValid = true;
+    }
+
+    if (['2+3', '3+2', '4+1'].includes(comboKey) && bebes > 0) isValid = false;
+    if (bebes > 2 || adults <= 0) isValid = false;
+
+    return isValid;
+  }
+
+  function switchTab(mode) {
+    document.getElementById('tab-direct').classList.toggle('active', mode === 'direct');
+    document.getElementById('tab-inverse').classList.toggle('active', mode === 'inverse');
+    document.getElementById('view-direct').style.display = (mode === 'direct') ? 'block' : 'none';
+    document.getElementById('view-inverse').style.display = (mode === 'inverse') ? 'block' : 'none';
+    
+    if (mode === 'direct') calculateDirect();
+    else calculateInverse();
+  }
+
+  /* LÒGICA DE CÀLCUL DIRECTE */
+  function calculateDirect() {
+    const basePrice = parseFloat(document.getElementById('dir-base-price').value) || 0;
+    const tipo = document.getElementById('dir-sel-tipo').value;
+    const numAdults = parseInt(document.getElementById('dir-adults').value) || 0;
+    const numNinos = parseInt(document.getElementById('dir-ninos').value) || 0;
+    const numBebes = parseInt(document.getElementById('dir-bebes').value) || 0;
+    const regimen = document.getElementById('dir-sel-regimen').value;
+    const numMascotas = parseInt(document.getElementById('dir-mascotas').value) || 0;
+    const nights = parseInt(document.getElementById('dir-nights').value) || 1;
+    const discount = parseFloat(document.getElementById('dir-disc').value) || 0;
+
+    const alertBox = document.getElementById('validation-msg');
+
+    if (!checkComboValid(tipo, numAdults, numNinos, numBebes)) {
+      alertBox.style.display = 'block';
+      document.getElementById('dir-res-night').textContent = "0,00 €";
+      document.getElementById('dir-res-total').textContent = "0,00 €";
+      document.getElementById('dir-res-pax').textContent = "0,00 €";
+      return;
+    } else {
+      alertBox.style.display = 'none';
+    }
+
+    let roomMultiplier = 1.0;
+    if (tipo === 'jardi') roomMultiplier = 1.10;
+    else if (tipo === 'baby_room') roomMultiplier = 1.15;
+    else if (tipo === 'confort_quad' || tipo === 'baby_quad') roomMultiplier = 1.20;
+    else if (tipo === 'suite') roomMultiplier = 1.30;
+
+    const adultRoomBase = basePrice * roomMultiplier;
+    let roomBaseTotal = 0;
+
+    if (numAdults === 1) {
+      if (numNinos === 0) roomBaseTotal += adultRoomBase * 1.80;
+      else {
+        roomBaseTotal += adultRoomBase * 2;
+        for (let i = 2; i <= numNinos; i++) roomBaseTotal += (i === 2) ? adultRoomBase * 0.60 : adultRoomBase * 0.50;
+      }
+    } else {
+      for (let i = 1; i <= numAdults; i++) roomBaseTotal += (i <= 2) ? adultRoomBase : adultRoomBase * 0.70;
+      for (let i = 1; i <= numNinos; i++) roomBaseTotal += (i <= 2) ? adultRoomBase * 0.60 : adultRoomBase * 0.50;
+    }
+
+    let regimenAdult = 0, regimenNen = 0;
+    if (regimen === 'MP') { regimenAdult = 20; regimenNen = 14; }
+    else if (regimen === 'PC') { regimenAdult = 40; regimenNen = 28; }
+
+    let regimenExtra = (numAdults * regimenAdult) + (numNinos * regimenNen);
+    let stayBeforeDiscount = roomBaseTotal + regimenExtra;
+
+    if (discount > 0) {
+      stayBeforeDiscount = stayBeforeDiscount * (1 - (discount / 100));
+    }
+
+    const petExtra = numMascotas * 17;
+    const nightTotal = stayBeforeDiscount + petExtra;
+
+    const grandTotal = nightTotal * nights;
+    const totalPax = numAdults + numNinos;
+    const avgPaxNight = totalPax > 0 ? (nightTotal / totalPax) : 0;
+
+    document.getElementById('dir-res-night').textContent = formatMoney(nightTotal);
+    document.getElementById('dir-res-total').textContent = formatMoney(grandTotal);
+    document.getElementById('dir-res-pax').textContent = formatMoney(avgPaxNight);
+  }
+
+  /* LÒGICA DE CÀLCUL INVERS I COMPARATIVA */
+  function calculateInverse() {
+    const knownPrice = parseFloat(document.getElementById('inv-known-price').value) || 0;
+    const alertBox = document.getElementById('validation-msg');
+    
+    // Dades Origen
+    const origTipo = document.getElementById('inv-orig-tipo').value;
+    const origAdults = parseInt(document.getElementById('inv-orig-adults').value) || 1;
+    const origNinos = parseInt(document.getElementById('inv-orig-ninos').value) || 0;
+    const origRegimen = document.getElementById('inv-orig-regimen').value;
+    const origMascotas = parseInt(document.getElementById('inv-orig-mascotas').value) || 0;
+
+    // Dades Target / Comparativa
+    const targetTipo = document.getElementById('inv-target-tipo').value;
+    const targetAdults = parseInt(document.getElementById('inv-target-adults').value) || 1;
+    const targetNinos = parseInt(document.getElementById('inv-target-ninos').value) || 0;
+    const targetRegimen = document.getElementById('inv-target-regimen').value;
+    const targetMascotas = parseInt(document.getElementById('inv-target-mascotas').value) || 0;
+    const nights = parseInt(document.getElementById('inv-nights').value) || 1;
+
+    const isOrigValid = checkComboValid(origTipo, origAdults, origNinos, 0);
+    const isTargetValid = checkComboValid(targetTipo, targetAdults, targetNinos, 0);
+
+    if (!isOrigValid || !isTargetValid) {
+      alertBox.style.display = 'block';
+      document.getElementById('inv-res-new-night').textContent = "0,00 €";
+      document.getElementById('inv-res-diff').textContent = "0,00 €";
+      document.getElementById('inv-bk-orig').textContent = "0,00 €";
+      document.getElementById('inv-bk-target').textContent = "0,00 €";
+      document.getElementById('inv-bk-total-estada').textContent = "0,00 €";
+      return;
+    } else {
+      alertBox.style.display = 'none';
+    }
+
+    let origRegimenAdult = 0, origRegimenNen = 0;
+    if (origRegimen === 'MP') { origRegimenAdult = 20; origRegimenNen = 14; }
+    else if (origRegimen === 'PC') { origRegimenAdult = 40; origRegimenNen = 28; }
+
+    const origRegimenExtra = (origAdults * origRegimenAdult) + (origNinos * origRegimenNen);
+    const origPetExtra = origMascotas * 17;
+    
+    const roomOnlyTarget = knownPrice - origRegimenExtra - origPetExtra;
+
+    let origMultiplier = 1.0;
+    if (origTipo === 'jardi') origMultiplier = 1.10;
+    else if (origTipo === 'baby_room') origMultiplier = 1.15;
+    else if (origTipo === 'confort_quad' || origTipo === 'baby_quad') origMultiplier = 1.20;
+    else if (origTipo === 'suite') origMultiplier = 1.30;
+
+    let factorUnits = 0;
+    if (origAdults === 1) {
+      if (origNinos === 0) factorUnits = 1.80;
+      else {
+        factorUnits = 2.0;
+        for (let i = 2; i <= origNinos; i++) factorUnits += (i === 2) ? 0.60 : 0.50;
+      }
+    } else {
+      for (let i = 1; i <= origAdults; i++) factorUnits += (i <= 2) ? 1.0 : 0.70;
+      for (let i = 1; i <= origNinos; i++) factorUnits += (i <= 2) ? 0.60 : 0.50;
+    }
+
+    const calculatedBaseAdult = roomOnlyTarget / (origMultiplier * factorUnits);
+
+    let targetMultiplier = 1.0;
+    if (targetTipo === 'jardi') targetMultiplier = 1.10;
+    else if (targetTipo === 'baby_room') targetMultiplier = 1.15;
+    else if (targetTipo === 'confort_quad' || targetTipo === 'baby_quad') targetMultiplier = 1.20;
+    else if (targetTipo === 'suite') targetMultiplier = 1.30;
+
+    const targetAdultRoomBase = calculatedBaseAdult * targetMultiplier;
+    let targetRoomBaseTotal = 0;
+
+    if (targetAdults === 1) {
+      if (targetNinos === 0) targetRoomBaseTotal += targetAdultRoomBase * 1.80;
+      else {
+        targetRoomBaseTotal += targetAdultRoomBase * 2;
+        for (let i = 2; i <= targetNinos; i++) targetRoomBaseTotal += (i === 2) ? targetAdultRoomBase * 0.60 : targetAdultRoomBase * 0.50;
+      }
+    } else {
+      for (let i = 1; i <= targetAdults; i++) targetRoomBaseTotal += (i <= 2) ? targetAdultRoomBase : targetAdultRoomBase * 0.70;
+      for (let i = 1; i <= targetNinos; i++) targetRoomBaseTotal += (i <= 2) ? targetAdultRoomBase * 0.60 : targetAdultRoomBase * 0.50;
+    }
+
+    let targetRegimenAdult = 0, targetRegimenNen = 0;
+    if (targetRegimen === 'MP') { targetRegimenAdult = 20; targetRegimenNen = 14; }
+    else if (targetRegimen === 'PC') { targetRegimenAdult = 40; targetRegimenNen = 28; }
+
+    const targetRegimenExtra = (targetAdults * targetRegimenAdult) + (targetNinos * targetRegimenNen);
+    const targetPetExtra = targetMascotas * 17;
+
+    const targetNightTotal = targetRoomBaseTotal + targetRegimenExtra + targetPetExtra;
+    const diffNight = targetNightTotal - knownPrice;
+
+    document.getElementById('inv-res-new-night').textContent = formatMoney(targetNightTotal);
+    document.getElementById('inv-res-diff').textContent = (diffNight >= 0 ? '+' : '') + formatMoney(diffNight);
+
+    document.getElementById('inv-bk-orig').textContent = formatMoney(knownPrice);
+    document.getElementById('inv-bk-target').textContent = formatMoney(targetNightTotal);
+    document.getElementById('inv-bk-total-estada').textContent = formatMoney(targetNightTotal * nights);
+  }
+
+  // EVENT LISTENERS
+  ['dir-base-price', 'dir-sel-tipo', 'dir-adults', 'dir-ninos', 'dir-bebes', 'dir-sel-regimen', 'dir-mascotas', 'dir-nights', 'dir-disc'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calculateDirect);
+    document.getElementById(id).addEventListener('change', calculateDirect);
+  });
+
+  ['inv-known-price', 'inv-orig-tipo', 'inv-orig-adults', 'inv-orig-ninos', 'inv-orig-regimen', 'inv-orig-mascotas', 'inv-target-tipo', 'inv-target-adults', 'inv-target-ninos', 'inv-target-regimen', 'inv-target-mascotas', 'inv-nights'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calculateInverse);
+    document.getElementById(id).addEventListener('change', calculateInverse);
+  });
+
+  calculateDirect();
+  calculateInverse();
+</script>
+</body>
+</html>
